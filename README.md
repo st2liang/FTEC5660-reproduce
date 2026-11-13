@@ -657,6 +657,36 @@ monitor.fit(healthy)                       # one-class, as in the study
 Re-fit on healthy runs from your own source; do not mix a simulator-trained
 monitor with real traces.
 
+## Reproduction study (coursework)
+
+An independent reproduction of the published numbers, run offline against the
+committed traces on a laptop CPU, plus one added deterministic check. Everything
+is under [`reproduction/`](reproduction/):
+
+- [`reproduction/report/reproduction_report.pdf`](reproduction/report/reproduction_report.pdf)
+  — six pages: reproduction targets and metric definitions, ours-versus-reported
+  table, the modification and its measured effect, and a debug diary. HTML
+  source and figures are beside it.
+- [`reproduction/package/`](reproduction/package/) — the runnable package.
+  [`run_repro.ps1`](reproduction/package/run_repro.ps1) chains the twelve
+  offline studies (~50 min), our result CSVs sit next to it, and
+  [`README.md`](reproduction/package/README.md) explains what each command
+  reproduces. Logs are not committed.
+- [`reproduction/slides/deck.html`](reproduction/slides/deck.html) — a
+  self-contained walkthrough (arrow keys or click, `#N` deep links), with the
+  spoken script in [`notes.md`](reproduction/slides/notes.md).
+
+Every offline number reproduces at the level of episode counts: checks
+59.6% (96.5% with coverage) against the monitor's 54.4%, at 0 of 63 versus 11 of
+63 false positives; the detector at 0.7065 ± 0.0682 and AUROC 0.8721 ± 0.0153
+over five seeds; repair 45% against 16% at 52% → 73% net success. The only
+figure that does not transfer is step latency (525 µs here against 219 µs on the
+authors' machine), which `results/tables/UNREPRODUCIBLE.md` marks as hardware.
+The added check, `repeat_stability`, flags a repeated identical call that returns
+a different monetary figure: 19 of 272 context-corruption episodes, 17 of them
+missed by `tool_contract`, at 0 of 2,765 healthy false positives and with every
+other table unchanged.
+
 ## Future work
 
 Each item below is a measured gap with a number attached, and the next thing
