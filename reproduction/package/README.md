@@ -17,7 +17,6 @@ reproduction\
    package\paper_vs_ours.csv       every target, paper value vs ours
    package\our_env.txt             interpreter and library versions
    report\reproduction_report.pdf  the 6-page report (+ HTML source, figures)
-   slides\deck.html                presentation deck with slides\notes.md script
 ```
 
 Logs are not committed: `run_repro.ps1` writes them to `logs\` beside this
