@@ -1,0 +1,20 @@
+dataset,episode_id,label,tau,first_violation_step,detail
+autogen7b_real,autogen-real-context_corruption-000,context_corruption,3,4,wikipedia_search returned different figures for the same call
+autogen7b_real,autogen-real-context_corruption-002,context_corruption,2,4,wikipedia_search returned different figures for the same call
+autogen7b_real2,autogen-real-context_corruption-003,context_corruption,2,7,wikipedia_search returned different figures for the same call
+autogen7b_real2,autogen-real-context_corruption-005,context_corruption,2,7,wikipedia_search returned different figures for the same call
+autogen7b_real3,autogen-real-context_corruption-003,context_corruption,2,6,wikipedia_search returned different figures for the same call
+autogen7b_real3,autogen-real-context_corruption-001,context_corruption,3,6,wikipedia_search returned different figures for the same call
+langgraph7b,langgraph-context_corruption-004,context_corruption,2,4,calculator returned different figures for the same call
+langgraph7b,langgraph-context_corruption-018,context_corruption,3,4,get_weather returned different figures for the same call
+langgraph7b_real,langgraph-real-context_corruption-000,context_corruption,2,3,arxiv_search returned different figures for the same call
+langgraph7b_real,langgraph-real-context_corruption-002,context_corruption,3,5,wikipedia_search returned different figures for the same call
+langgraph7b_real2,langgraph-real-context_corruption-001,context_corruption,2,5,wikipedia_search returned different figures for the same call
+langgraph7b_real2,langgraph-real-context_corruption-003,context_corruption,2,9,get_weather returned different figures for the same call
+real_research3b,real-context_corruption-000,context_corruption,2,8,mcp_call returned different figures for the same call
+real_research7b_long_ext,real-context_corruption-000,context_corruption,2,10,arxiv_search returned different figures for the same call
+real_research7b_long_ext,real-context_corruption-004,context_corruption,2,10,arxiv_search returned different figures for the same call
+real_research7b_long_ext,real-context_corruption-008,context_corruption,2,10,arxiv_search returned different figures for the same call
+real_research7b_long_ext,real-context_corruption-011,context_corruption,2,11,wikipedia_search returned different figures for the same call
+real_research7b_long_ext,real-context_corruption-012,context_corruption,2,10,arxiv_search returned different figures for the same call
+real_task_rollback,rollback-arxiv_paper_search-context_corruption-01,context_corruption,2,3,arxiv_search returned different figures for the same call

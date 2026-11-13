@@ -1,0 +1,39 @@
+target,metric,paper_reported,ours,artifact,verdict
+Table 3 served (T=0.2),failures caught by checks,60% (34/57),59.6% (34/57),our_verification_vs_monitor.csv,reproduced
+Table 3 served (T=0.2),failures caught with coverage check,96%,96.5% (55/57),our_verification_vs_monitor.csv,reproduced
+Table 3 served (T=0.2),false positives (checks),0/63 = 0%,0/63 = 0%,our_verification_vs_monitor.csv,reproduced
+Table 3 served (T=0.2),failures caught by monitor,54% (31/57),54.4% (31/57),our_verification_vs_monitor.csv,reproduced
+Table 3 served (T=0.2),false positives (monitor),11/63 = 17%,11/63 = 17.5%,our_verification_vs_monitor.csv,reproduced
+Table 3 provoked (T=0.9),failures caught by checks,65% (53/82),64.6% (53/82),our_verification_vs_monitor.csv,reproduced
+Table 3 provoked (T=0.9),failures caught with coverage check,96%,96.3% (79/82),our_verification_vs_monitor.csv,reproduced
+Table 3 provoked (T=0.9),false positives (checks),0/38 = 0%,0/38 = 0%,our_verification_vs_monitor.csv,reproduced
+Table 3 provoked (T=0.9),failures caught by monitor,40% (33/82),40.2% (33/82),our_verification_vs_monitor.csv,reproduced
+Table 3 provoked (T=0.9),false positives (monitor),6/38 = 16%,6/38 = 15.8%,our_verification_vs_monitor.csv,reproduced
+Held-out arm (120 disjoint seeds),failures caught by totals,54% (30/56),53.6% (30/56),our_verification_holdout.csv,reproduced
+Held-out arm (120 disjoint seeds),failures caught with coverage,93% (52/56),92.9% (52/56),our_verification_holdout.csv,reproduced
+Held-out arm (120 disjoint seeds),false positives,0/64,0/64,our_verification_holdout.csv,reproduced
+Cross-model arm (llama3.1:8b),failures caught,110 of 110,110/110 (100%),our_verification_llama8b.csv,reproduced
+Cross-model arm (llama3.1:8b),false positives,0 of 10,0/10,our_verification_llama8b.csv,reproduced
+tool_contract coverage,false positives on healthy runs,0 of 1825,0 of 2765,our_tool_contract_denominators.csv,reproduced (larger corpus)
+tool_contract coverage,context_corruption recall,46% (113/244),41.5% (113/272),our_tool_contract_denominators.csv,same numerator; denominator grew
+tool_contract coverage,looping recall,44% (105/247),38.2% (105/275),our_tool_contract_denominators.csv,same numerator; denominator grew
+tool_contract coverage,flagged within one step of onset,215 of 218,215/218,our_tool_contract_denominators.csv,reproduced
+Real traces (2 823 episodes),detection rate at 5% budget,0.71 (0.709),0.7089,our_real_traces.csv,reproduced
+Real traces (2 823 episodes),healthy false-alarm rate,0.20,0.2000,our_real_traces.csv,reproduced
+Real traces (2 823 episodes),episode AUROC,0.840,0.8401,our_real_traces.csv,reproduced
+Real traces (2 823 episodes),detection goal drift,0.77,0.7727,our_real_traces.csv,reproduced
+Real traces (2 823 episodes),detection looping,1.00,1.0000,our_real_traces.csv,reproduced
+Real traces (2 823 episodes),detection tool cascade,0.83,0.8333,our_real_traces.csv,reproduced
+Real traces (2 823 episodes),detection context corruption,0.29,0.2857,our_real_traces.csv,reproduced
+Synthetic testbed (5 seeds),detection rate,0.707 +/- 0.068,0.7065 +/- 0.0682,multiseed_summary.csv,reproduced
+Synthetic testbed (5 seeds),episode AUROC,0.872 +/- 0.015,0.8721 +/- 0.0153,multiseed_summary.csv,reproduced
+Synthetic testbed (5 seeds),mean lead (steps),4.6,4.61,multiseed_summary.csv,reproduced
+Synthetic testbed (5 seeds),realized false-alarm rate,4.4%,4.4%,multiseed_summary.csv,reproduced
+Synthetic testbed (master seed),detection rate,0.693 (master seed),0.6925,our_h1_main.csv,reproduced
+Synthetic testbed (master seed),episode AUROC,0.847 (master seed),0.8473,our_h1_main.csv,reproduced
+Repair (Table 4, n=55 x 3 repeats),located rung recovery,45%,45% (44-47),our_repair_policies.csv,reproduced
+Repair (Table 4, n=55 x 3 repeats),resample control recovery,16%,16% (15-18),our_repair_policies.csv,reproduced
+Repair (Table 4, n=55 x 3 repeats),net task success,52% -> 73%,52% -> 73%,our_repair_policies.csv,reproduced
+Cost (reference machine),fit time,8.7 s,9.08 s,our_runtime.csv,machine-specific
+Cost (reference machine),step latency median,219 us,525 us,our_runtime.csv,machine-specific
+Cost (reference machine),state footprint,3.95 MB,3.95 MB,our_runtime.csv,reproduced
