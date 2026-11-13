@@ -16,7 +16,7 @@ reproduction\
    package\our_*.csv               what our runs produced
    package\paper_vs_ours.csv       every target, paper value vs ours
    package\our_env.txt             interpreter and library versions
-   report\reproduction_report.pdf  the 6-page report (+ HTML source, figures)
+   report\reproduction_report.pdf  the 6-page report
 ```
 
 Logs are not committed: `run_repro.ps1` writes them to `logs\` beside this
