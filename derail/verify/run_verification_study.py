@@ -282,6 +282,75 @@ def contract_coverage() -> None:
     print(f"[contract] wrote {TABLES / 'tool_contract_coverage.csv'}")
 
 
+def repeat_stability_coverage() -> None:
+    """Score `repeat_stability` across every labelled corpus, beside
+    `tool_contract`.
+
+    Same scope rules as `contract_coverage`: imported corpora (`_*`) are
+    skipped, and every denominator is written out rather than only printed.
+    The columns that matter are the last two: the episodes the new check
+    catches that `tool_contract` misses (its incremental value) and the
+    healthy runs either check flags (the cost of the added sensitivity).
+    """
+    from derail.verify.checks import repeat_stability, tool_contract
+
+    per_label: dict[str, list[tuple[bool, bool]]] = {}
+    rows = []
+    for directory in sorted((ROOT / "traces").iterdir()):
+        manifest = directory / "manifest.json"
+        if not directory.is_dir() or not manifest.exists():
+            continue
+        if directory.name.startswith("_"):
+            continue
+        for entry in json.loads(manifest.read_text("utf-8")):
+            path = directory / entry.get("file", f"{entry['episode_id']}.jsonl")
+            if not path.exists():
+                continue
+            steps = [json.loads(x) for x in
+                     path.read_text("utf-8").splitlines() if x.strip()]
+            rep = repeat_stability(steps)
+            con = tool_contract(steps, BOOKING_SPEC)
+            label = entry.get("failure_class") or "healthy"
+            per_label.setdefault(label, []).append((bool(rep), bool(con)))
+            if rep:
+                rows.append({"dataset": directory.name,
+                             "episode_id": entry["episode_id"],
+                             "label": label, "tau": entry.get("tau"),
+                             "first_violation_step": rep[0].step,
+                             "detail": rep[0].terse})
+    TABLES.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_csv(TABLES / "repeat_stability_coverage.csv",
+                              index=False)
+    summary = [{"label": label,
+                "flagged": sum(1 for r, _ in v if r),
+                "n": len(v),
+                "rate": round(sum(1 for r, _ in v if r) / len(v), 4),
+                "tool_contract_flagged": sum(1 for _, c in v if c),
+                "union_flagged": sum(1 for r, c in v if r or c),
+                "repeat_only": sum(1 for r, c in v if r and not c)}
+               for label, v in sorted(per_label.items())]
+    pd.DataFrame(summary).to_csv(
+        TABLES / "repeat_stability_denominators.csv", index=False)
+
+    print("\n[repeat] repeated identical lookups that disagreed on a figure\n")
+    print(f"{'label':<22}{'flagged':>9}{'n':>8}{'rate':>8}"
+          f"{'contract':>10}{'union':>8}{'new only':>10}")
+    for row in summary:
+        print(f"{row['label']:<22}{row['flagged']:>9}{row['n']:>8}"
+              f"{row['rate']:>8.1%}{row['tool_contract_flagged']:>10}"
+              f"{row['union_flagged']:>8}{row['repeat_only']:>10}")
+    healthy = per_label.get("healthy", [])
+    print(f"\n[repeat] false positives on healthy runs: "
+          f"{sum(1 for r, _ in healthy if r)}/{len(healthy)}")
+    lead = [r for r in rows if r["tau"] is not None]
+    if lead:
+        at_onset = sum(1 for r in lead
+                       if r["first_violation_step"] <= int(r["tau"]) + 1)
+        print(f"[repeat] flagged within one step of onset: "
+              f"{at_onset}/{len(lead)}")
+    print(f"[repeat] wrote {TABLES / 'repeat_stability_coverage.csv'}")
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -292,10 +361,14 @@ if __name__ == "__main__":
                          "designed against (e.g. organic_demo7b_holdout)")
     ap.add_argument("--contract-coverage", action="store_true",
                     help="score tool_contract across every labelled corpus")
+    ap.add_argument("--repeat-stability", action="store_true",
+                    help="score repeat_stability across every labelled corpus")
     a = ap.parse_args()
     if a.holdout:
         holdout(a.holdout)
     elif a.contract_coverage:
         contract_coverage()
+    elif a.repeat_stability:
+        repeat_stability_coverage()
     else:
         main()

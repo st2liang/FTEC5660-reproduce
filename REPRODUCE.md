@@ -156,6 +156,7 @@ py -m derail.experiments.run_real_traces                 # real_traces.csv, from
 py -m derail.experiments.run_hybrid_study                # hybrid_*.csv
 py -m derail.verify.run_verification_study               # verification_vs_monitor.csv
 py -m derail.verify.run_verification_study --contract-coverage   # tool_contract_coverage.csv
+py -m derail.verify.run_verification_study --repeat-stability    # repeat_stability_*.csv
 py -m verification.serving_temperature                # serving_temperature.csv
 py -m derail.intervene.evaluate_repair_policies --from-csv   # re-analyse the repair study
 py -m derail.experiments.score_organic                   # organic_validation.csv
