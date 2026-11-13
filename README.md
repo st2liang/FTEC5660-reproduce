@@ -672,9 +672,6 @@ is under [`reproduction/`](reproduction/):
   offline studies (~50 min), our result CSVs sit next to it, and
   [`README.md`](reproduction/package/README.md) explains what each command
   reproduces. Logs are not committed.
-- [`reproduction/slides/deck.html`](reproduction/slides/deck.html) — a
-  self-contained walkthrough (arrow keys or click, `#N` deep links), with the
-  spoken script in [`notes.md`](reproduction/slides/notes.md).
 
 Every offline number reproduces at the level of episode counts: checks
 59.6% (96.5% with coverage) against the monitor's 54.4%, at 0 of 63 versus 11 of
