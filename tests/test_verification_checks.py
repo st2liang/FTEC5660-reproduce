@@ -11,8 +11,8 @@ import pytest
 
 from derail.verify.checks import (BOOKING_SPEC, LineItem, TaskSpec,
                                   _events_per_step, _selection_matches,
-                                  tolerance_for, tool_contract,
-                                  total_consistency, verify)
+                                  repeat_stability, tolerance_for,
+                                  tool_contract, total_consistency, verify)
 
 
 # ------------------------------------------------- structured events win
@@ -149,3 +149,36 @@ def test_contract_patterns_are_authored_as_complete_shapes():
             assert not alt.startswith("^") and not alt.endswith("$"), (
                 f"{tool}: {alt!r} carries anchors, but fullmatch already "
                 f"anchors; the mixed form is how a prefix alternative hides")
+
+
+# ------------------------------------------------ repeat_stability pins
+def test_a_verbatim_replay_that_answers_the_same_figure_is_not_a_finding():
+    step = '{"a": 1}'
+    steps = [{"text": f"[lookup_flight({step}) -> $100]"},
+             {"text": "[get_weather({\"c\": \"x\"}) -> sunny]"},
+             {"text": f"[lookup_flight({step}) -> $100]"}]
+    assert repeat_stability(steps) == []
+
+
+def test_a_verbatim_replay_that_answers_a_new_figure_is_dated_at_the_replay():
+    """The first call cannot be the finding: at that point nothing disagrees."""
+    step = '{"a": 1}'
+    steps = [{"text": f"[lookup_flight({step}) -> $361]"},
+             {"text": "[get_weather({\"c\": \"x\"}) -> sunny]"},
+             {"text": f"[lookup_flight({step}) -> $605]"}]
+    findings = repeat_stability(steps)
+    assert [f.check for f in findings] == ["repeat_stability"]
+    assert findings[0].step == 2
+
+
+def test_a_benign_text_difference_between_replays_is_not_a_finding():
+    """Search snippets truncate differently on healthy runs; that cost 28 FPs."""
+    steps = [{"text": '[wikipedia_search({"q": "a"}) -> lorem ipsum dolor]'},
+             {"text": '[wikipedia_search({"q": "a"}) -> lorem ipsum]'}]
+    assert repeat_stability(steps) == []
+
+
+def test_an_unrepeated_call_cannot_be_judged_and_is_not_flagged():
+    steps = [{"text": '[lookup_flight({"a": 1}) -> $361]'},
+             {"text": '[lookup_flight({"a": 2}) -> $605]'}]
+    assert repeat_stability(steps) == []

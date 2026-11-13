@@ -505,11 +505,75 @@ def tool_contract(steps: list[dict], spec: TaskSpec) -> list[Finding]:
     return findings
 
 
+#: A monetary figure in a tool result: symbol-prefixed ("$361") or
+#: ISO-suffixed ("361 USD"). Same dialect the answer readers use, widened to
+#: the symbols a tool result may carry.
+_MONEY_FIGURE = re.compile(
+    r"(?:[$€£¥]\s?\d[\d,]*(?:\.\d+)?"
+    r"|\d[\d,]*(?:\.\d+)?\s?(?:USD|EUR|GBP|JPY))", re.I)
+
+
+def _money_figures(text: str) -> list[str]:
+    """The monetary figures in one result, order- and spacing-insensitive."""
+    return sorted(m.group(0).replace(" ", "").replace(",", "").lower()
+                  for m in _MONEY_FIGURE.finditer(text or ""))
+
+
+def repeat_stability(steps: list[dict]) -> list[Finding]:
+    """Flag a repeated identical tool call whose result changed its figures.
+
+    `tool_contract` reads one result at a time, so it is silent on corruption
+    that keeps a legal shape — the paper's stated residual ("a price altered
+    from $361 to $605 is a well-formed price ... separating it from a real one
+    needs a reference this layer does not have"). A run that queries the same
+    item twice supplies that reference itself: replaying one call is a
+    deterministic operation, so two identical calls that disagree on a
+    monetary figure mean at least one of the two results is not the tool's.
+
+    The invariant is narrow on purpose. Text differences between replays are
+    benign in the committed corpora — a search result page is truncated at a
+    different point, a rate-limited call answers with a different error
+    wording — and a check keyed on "any difference" false-alarms on 28 of
+    2,765 healthy episodes. Keyed on the monetary figures it false-alarms on
+    0 of 2,765, so this is the form that ships.
+
+    Scope bound: a figure corrupted once, on a call the agent never repeats,
+    is invisible here. Measured on the committed corpora: 19 of 272
+    context_corruption episodes flagged, 16 of them that `tool_contract`
+    misses, and 0 of 2,765 healthy episodes.
+    """
+    first: dict[tuple[str, str], list[str]] = {}
+    reported: set[tuple[str, str]] = set()
+    findings: list[Finding] = []
+    for t, events in enumerate(_events_per_step(steps)):
+        for event in events:
+            if event.is_error or not event.has_result:
+                continue
+            key = (event.name, canonical_args(event.args))
+            result = (event.result or "").strip()
+            if key not in first:
+                first[key] = _money_figures(result)
+                continue
+            before = first[key]
+            after = _money_figures(result)
+            if after == before or key in reported:
+                continue
+            reported.add(key)
+            findings.append(Finding(
+                check="repeat_stability", step=t,
+                detail=(f"{event.name} returned {before} on an earlier "
+                        f"identical call and {after} here"),
+                terse=f"{event.name} returned different figures for the same "
+                      f"call"))
+    return findings
+
+
 def verify(steps: list[dict], spec: TaskSpec) -> VerificationResult:
     """Run every check. No thresholds, no calibration, no healthy reference."""
     res = total_consistency(steps, spec)
     res.findings.extend(required_coverage(steps, spec))
     res.findings.extend(tool_contract(steps, spec))
+    res.findings.extend(repeat_stability(steps))
     return res
 
 
@@ -661,4 +725,26 @@ if __name__ == "__main__":       # module self-test (no corpus, no network)
         pass
     else:
         raise AssertionError("a euro spec must refuse dollar figures")
+
+    # --- repeat_stability ------------------------------------------------
+    # A verbatim replay that answers the same figure is not a finding.
+    replayed = list(ok[:-1]) + [
+        {"text": '[lookup_flight({"a": 1}) -> $100]'},
+        {"text": "The grand total is $1120 USD."}]
+    assert not repeat_stability(replayed), repeat_stability(replayed)
+
+    # A verbatim replay that answers a different figure is, and it is dated
+    # at the replay, not at the first call.
+    changed = list(ok[:-1]) + [
+        {"text": '[lookup_flight({"a": 1}) -> $605]'},
+        {"text": "The grand total is $1625 USD."}]
+    f = repeat_stability(changed)
+    assert [x.check for x in f] == ["repeat_stability"], f
+    assert f[0].step == 8, f
+
+    # An error is a declared outcome, not an unstable one.
+    assert not repeat_stability(ok[:-1] + [
+        {"text": '[lookup_flight({"a": 1}) -> Error: 429]'},
+        {"text": "The grand total is $1120 USD."}])
+
     print("PASS: verify.checks self-test")
